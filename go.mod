@@ -62,12 +62,15 @@ replace (
 
 require (
 	github.com/google/go-containerregistry v0.0.0-20200424115305-087a4bdef7c4
+	github.com/juju/errors v0.0.0-20190806202954-0232dcc7464d // indirect
+	github.com/juju/testing v0.0.0-20190723135506-ce30eb24acd2 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/rancher/k3s v1.18.3-0.20200622210601-f5ee757b86f8
+	github.com/rancher/k3s v1.18.3-0.20200709202052-925a6d2da822
 	github.com/rancher/wrangler v0.6.1
 	github.com/sirupsen/logrus v1.4.2
 	github.com/urfave/cli v1.22.2
 	google.golang.org/grpc v1.26.0
+	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
 	k8s.io/api v0.18.0
 	k8s.io/apimachinery v0.18.0
 	k8s.io/apiserver v0.0.0

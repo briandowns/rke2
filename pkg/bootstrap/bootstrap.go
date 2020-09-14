@@ -97,7 +97,7 @@ func Stage(dataDir string, imageConf images.Images) (string, error) {
 				return "", err
 			}
 		} else {
-			logrus.Infof("Runtime image tarball preload disabled by --system-default-registry=%s", imageConf.SystemDefaultRegistry)
+			logrus.Infof("Runtime image tarball preload disabled by --system-default-registry=" + imageConf.SystemDefaultRegistry)
 		}
 
 		// If we didn't find the requested image in a tarball, pull it from the remote registry.
@@ -199,7 +199,7 @@ func releaseRefDigest(ref name.Reference) (string, error) {
 		}
 		return parts[0], nil
 	}
-	return "", fmt.Errorf("Bootstrap image %q is not a not a reference to a digest or version tag (%q)", ref, releasePattern)
+	return "", fmt.Errorf("bootstrap image %q is not a not a reference to a digest or version tag (%q)", ref, releasePattern)
 }
 
 // extractToDir extracts to targetDir all content from img where the filename is prefixed with prefix.
@@ -297,10 +297,10 @@ func preloadBootstrapImage(dataDir string, imageName string) (v1.Image, error) {
 	for fileName := range files {
 		img, err := tarball.ImageFromPath(fileName, &imageTag)
 		if err != nil {
-			logrus.Debugf("Did not find %q in %q: %s", imageName, fileName, err)
+			logrus.Debugf("Did not find image: %q in directory: %q: %s", imageName, fileName, err)
 			continue
 		}
-		logrus.Debugf("Found %q in %q", imageName, fileName)
+		logrus.Debugf("Found image: %q in directory: %q", imageName, fileName)
 		return img, nil
 	}
 	logrus.Debugf("No local image available for %q: not found in any file in %q", imageName, imagesDir)
@@ -347,15 +347,15 @@ func setSystemDefaultRegistry(manifestsDir string, systemDefaultRegistry string)
 // If the file cannot be decoded as a HelmChart, it is silently skipped. Any other IO error is considered
 // a failure.
 func rewriteChart(fileName string, info os.FileInfo, systemDefaultRegistry string, serializer *json.Serializer) error {
-	chartChanged := false
+	var chartChanged bool
 
-	bytes, err := ioutil.ReadFile(fileName)
+	b, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		return errors2.Wrapf(err, "Failed to read manifest %q", fileName)
+		return errors2.Wrapf(err, "failed to read manifest %q", fileName)
 	}
 
 	// Ignore manifest if it cannot be decoded
-	obj, _, err := serializer.Decode(bytes, nil, nil)
+	obj, _, err := serializer.Decode(b, nil, nil)
 	if err != nil {
 		logrus.Debugf("Failed to decode manifest %q: %s", fileName, err)
 		return nil
@@ -392,16 +392,16 @@ func rewriteChart(fileName string, info os.FileInfo, systemDefaultRegistry strin
 	if chartChanged {
 		f, err := os.OpenFile(fileName, os.O_RDWR|os.O_TRUNC, info.Mode())
 		if err != nil {
-			return errors2.Wrapf(err, "Unable to open HelmChart %q", fileName)
+			return errors2.Wrapf(err, "unable to open HelmChart %q", fileName)
 		}
 
 		if err := serializer.Encode(chart, f); err != nil {
 			_ = f.Close()
-			return errors2.Wrapf(err, "Failed to serialize modified HelmChart %q", fileName)
+			return errors2.Wrapf(err, "failed to serialize modified HelmChart %q", fileName)
 		}
 
 		if err := f.Close(); err != nil {
-			return errors2.Wrapf(err, "Failed to write modified HelmChart %q", fileName)
+			return errors2.Wrapf(err, "failed to write modified HelmChart %q", fileName)
 		}
 
 		logrus.Infof("Updated HelmChart %q to apply --system-default-registry modifications", fileName)

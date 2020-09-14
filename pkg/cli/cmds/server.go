@@ -102,7 +102,7 @@ func NewServerCommand() cli.Command {
 
 func ServerRun(clx *cli.Context) error {
 	if profile == "" {
-		logrus.Warn("not running in CIS 1.5 mode")
+		logrus.Warn("Server not running in CIS 1.5 mode")
 	}
 	return rke2.Server(clx, config)
 }

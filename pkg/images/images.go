@@ -95,13 +95,13 @@ func checkPreloadedImages(dir string) (bool, error) {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
-		logrus.Errorf("unable to stat image directory %s: %v", dir, err)
+		logrus.Errorf("Unable to stat image directory %s: %v", dir, err)
 		return false, err
 	}
 
 	fileInfos, err := ioutil.ReadDir(dir)
 	if err != nil {
-		logrus.Errorf("unable to list images in %s: %v", dir, err)
+		logrus.Errorf("Unable to list images in %s: %v", dir, err)
 		return false, nil
 	}
 	for _, fileInfo := range fileInfos {

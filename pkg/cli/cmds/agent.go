@@ -55,7 +55,7 @@ func NewAgentCommand() cli.Command {
 
 func AgentRun(clx *cli.Context) error {
 	if profile == "" {
-		logrus.Warn("not running in CIS 1.5 mode")
+		logrus.Warn("Agent not running in CIS 1.5 mode")
 	}
 	return rke2.Agent(clx, config)
 }

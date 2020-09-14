@@ -153,7 +153,12 @@ func setSystemUnrestricted(ctx context.Context, cs *kubernetes.Clientset, ns *v1
 //   if they do, delete them.
 func setPSPs() func(context.Context, <-chan struct{}, string) error {
 	return func(ctx context.Context, apiServerReady <-chan struct{}, kubeConfigAdmin string) error {
-		logrus.Info("Applying PSP's...")
+		if cisMode {
+			logrus.Info("Applying CIS mode PSP's...")
+		} else {
+			logrus.Info("Applying PSP's...")
+		}
+
 		go func() {
 			<-apiServerReady
 
@@ -345,7 +350,12 @@ func setPSPs() func(context.Context, <-chan struct{}, string) error {
 			}); err != nil {
 				logrus.Fatalf("psp: update namespace: %s - %s", ns.Name, err.Error())
 			}
-			logrus.Info("Applying PSP's complete")
+			if cisMode {
+				logrus.Info("Applying CIS mode PSP's complete")
+			} else {
+				logrus.Info("Applying mode PSP's complete")
+			}
+
 		}()
 		return nil
 	}
@@ -355,7 +365,7 @@ func setPSPs() func(context.Context, <-chan struct{}, string) error {
 // and updates that value to point to a newly retrieve value in
 // the event a conflict error is returned.
 func updateNamespaceRef(ctx context.Context, cs *kubernetes.Clientset, ns *v1.Namespace) error {
-	logrus.Info("updating namespace: " + ns.Name)
+	logrus.Info("Updating namespace: " + ns.Name)
 	newNS, err := cs.CoreV1().Namespaces().Get(ctx, ns.Name, metav1.GetOptions{})
 	if err != nil {
 		return err

@@ -106,7 +106,7 @@ func validateCISreqs() error {
 			// failing since we can't process
 			// further whether the flag was
 			// called or not.
-			logrus.Fatal(err)
+			logrus.Fatal("error retrieving sysctl value: ", err)
 		}
 		if cv != pv {
 			ce = append(ce, fmt.Errorf("%s=%d - expected %d", kp, cv, pv))
@@ -153,7 +153,7 @@ func NewApp() *cli.App {
 		case "":
 			// continue. warning output another layer down.
 		default:
-			logrus.Fatal("invalid value provided for --profile flag")
+			logrus.Fatal("Invalid value provided for --profile flag or RKE2_CIS_PROFILE env var")
 		}
 		return nil
 	}

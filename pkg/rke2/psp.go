@@ -41,7 +41,7 @@ func setGlobalUnrestricted(ctx context.Context, cs *kubernetes.Clientset, ns *v1
 	if _, ok := ns.Annotations[namespaceAnnotationGlobalUnrestricted]; !ok {
 		if _, err := cs.RbacV1().ClusterRoles().Get(ctx, globalUnrestrictedPSPName, metav1.GetOptions{}); err != nil {
 			if apierrors.IsNotFound(err) {
-				logrus.Infof("Setting PSP: %s", globalUnrestrictedPSPName)
+				logrus.Info("Setting PSP: " + globalUnrestrictedPSPName)
 				tmpl := fmt.Sprintf(globalUnrestrictedPSPTemplate, globalUnrestrictedPSPName)
 				if err := deployPodSecurityPolicyFromYaml(ctx, cs, tmpl); err != nil {
 					return err
@@ -52,7 +52,7 @@ func setGlobalUnrestricted(ctx context.Context, cs *kubernetes.Clientset, ns *v1
 		}
 		if _, err := cs.RbacV1().ClusterRoles().Get(ctx, globalUnrestrictedRoleName, metav1.GetOptions{}); err != nil {
 			if apierrors.IsNotFound(err) {
-				logrus.Infof("Setting Cluster Role: %s", globalUnrestrictedRoleName)
+				logrus.Info("Setting Cluster Role: " + globalUnrestrictedRoleName)
 				tmpl := fmt.Sprintf(roleTemplate, globalUnrestrictedRoleName, globalUnrestrictedPSPName)
 				if err := deployClusterRoleFromYaml(ctx, cs, tmpl); err != nil {
 					return err
@@ -63,7 +63,7 @@ func setGlobalUnrestricted(ctx context.Context, cs *kubernetes.Clientset, ns *v1
 		}
 		if _, err := cs.RbacV1().ClusterRoleBindings().Get(ctx, globalUnrestrictedRoleBindingName, metav1.GetOptions{}); err != nil {
 			if apierrors.IsNotFound(err) {
-				logrus.Infof("Setting Cluster RoleBinding: %s", globalUnrestrictedRoleBindingName)
+				logrus.Info("Setting Cluster RoleBinding: " + globalUnrestrictedRoleBindingName)
 				tmpl := fmt.Sprintf(globalUnrestrictedRoleBindingTemplate, globalUnrestrictedRoleBindingName, globalUnrestrictedRoleName)
 				if err := deployClusterRoleBindingFromYaml(ctx, cs, tmpl); err != nil {
 					return err
@@ -83,7 +83,7 @@ func setSystemUnrestricted(ctx context.Context, cs *kubernetes.Clientset, ns *v1
 	if _, ok := ns.Annotations[namespaceAnnotationSystemUnrestricted]; !ok {
 		if _, err := cs.RbacV1().ClusterRoles().Get(ctx, systemUnrestrictedPSPName, metav1.GetOptions{}); err != nil {
 			if apierrors.IsNotFound(err) {
-				logrus.Infof("Setting PSP: %s", systemUnrestrictedPSPName)
+				logrus.Info("Setting PSP: " + systemUnrestrictedPSPName)
 				tmpl := fmt.Sprintf(systemUnrestrictedPSPTemplate, systemUnrestrictedPSPName)
 				if err := deployPodSecurityPolicyFromYaml(ctx, cs, tmpl); err != nil {
 					return err
@@ -94,7 +94,7 @@ func setSystemUnrestricted(ctx context.Context, cs *kubernetes.Clientset, ns *v1
 		}
 		if _, err := cs.RbacV1().ClusterRoles().Get(ctx, systemUnrestrictedRoleName, metav1.GetOptions{}); err != nil {
 			if apierrors.IsNotFound(err) {
-				logrus.Infof("Setting Cluster Role: %s", systemUnrestrictedRoleName)
+				logrus.Info("Setting Cluster Role: " + systemUnrestrictedRoleName)
 				tmpl := fmt.Sprintf(roleTemplate, systemUnrestrictedRoleName, systemUnrestrictedPSPName)
 				if err := deployClusterRoleFromYaml(ctx, cs, tmpl); err != nil {
 					return err
@@ -105,7 +105,7 @@ func setSystemUnrestricted(ctx context.Context, cs *kubernetes.Clientset, ns *v1
 		}
 		if _, err := cs.RbacV1().ClusterRoleBindings().Get(ctx, systemUnrestrictedRoleBindingName, metav1.GetOptions{}); err != nil {
 			if apierrors.IsNotFound(err) {
-				logrus.Infof("Setting Cluster RoleBinding: %s", systemUnrestrictedRoleBindingName)
+				logrus.Info("Setting Cluster RoleBinding: " + systemUnrestrictedRoleBindingName)
 				tmpl := fmt.Sprintf(systemUnrestrictedNodesRoleBindingTemplate, systemUnrestrictedRoleBindingName, systemUnrestrictedRoleName)
 				if err := deployClusterRoleBindingFromYaml(ctx, cs, tmpl); err != nil {
 					return err
@@ -116,7 +116,7 @@ func setSystemUnrestricted(ctx context.Context, cs *kubernetes.Clientset, ns *v1
 		}
 		if _, err := cs.RbacV1().ClusterRoleBindings().Get(ctx, systemUnrestrictedSvcAcctRoleBindingName, metav1.GetOptions{}); err != nil {
 			if apierrors.IsNotFound(err) {
-				logrus.Infof("Setting Cluster RoleBinding: %s", systemUnrestrictedSvcAcctRoleBindingName)
+				logrus.Info("Setting Cluster RoleBinding: " + systemUnrestrictedSvcAcctRoleBindingName)
 				if err := deployRoleBindingFromYaml(ctx, cs, systemUnrestrictedServiceAcctRoleBindingTemplate); err != nil {
 					return err
 				}
@@ -164,12 +164,12 @@ func setPSPs() func(context.Context, <-chan struct{}, string) error {
 
 			cs, err := newClient(kubeConfigAdmin, nil)
 			if err != nil {
-				logrus.Fatalf("psp: new k8s client: %s", err.Error())
+				logrus.Fatal("psp: new k8s client:" + err.Error())
 			}
 
 			ns, err := cs.CoreV1().Namespaces().Get(ctx, metav1.NamespaceSystem, metav1.GetOptions{})
 			if err != nil {
-				logrus.Fatalf("psp: get kube-system namespace: %s", err.Error())
+				logrus.Fatal("psp: get kube-system namespace: " + err.Error())
 			}
 			if ns.Annotations == nil {
 				ns.Annotations = make(map[string]string)
@@ -177,11 +177,11 @@ func setPSPs() func(context.Context, <-chan struct{}, string) error {
 
 			if !cisMode { // non-CIS mode
 				if err := setGlobalUnrestricted(ctx, cs, ns); err != nil {
-					logrus.Fatalf("psp: set globalUnrestricted: %s", err.Error())
+					logrus.Fatal("psp: set globalUnrestricted: " + err.Error())
 				}
 
 				if err := setSystemUnrestricted(ctx, cs, ns); err != nil {
-					logrus.Fatalf("psp: set systemUnrestricted: %s", err.Error())
+					logrus.Fatal("psp: set systemUnrestricted: " + err.Error())
 				}
 
 				if _, ok := ns.Annotations[namespaceAnnotationGlobalRestricted]; !ok {
@@ -190,10 +190,10 @@ func setPSPs() func(context.Context, <-chan struct{}, string) error {
 						if apierrors.IsNotFound(err) {
 							tmpl := fmt.Sprintf(globalRestrictedPSPTemplate, globalRestrictedPSPName)
 							if err := deployPodSecurityPolicyFromYaml(ctx, cs, tmpl); err != nil {
-								logrus.Fatalf("psp: deploy psp: %s", err.Error())
+								logrus.Fatal("psp: deploy psp: " + err.Error())
 							}
 						} else {
-							logrus.Fatalf("psp: get psp: %s", err.Error())
+							logrus.Fatal("psp: get psp: " + err.Error())
 						}
 					}
 
@@ -202,33 +202,33 @@ func setPSPs() func(context.Context, <-chan struct{}, string) error {
 					if err != nil {
 						switch {
 						case apierrors.IsAlreadyExists(err):
-							logrus.Infof("Deleting clusterRole: %s", globalRestrictedRoleName)
+							logrus.Info("Deleting clusterRole: " + globalRestrictedRoleName)
 							if err := cs.RbacV1().ClusterRoles().Delete(ctx, globalRestrictedRoleName, metav1.DeleteOptions{}); err != nil {
-								logrus.Fatalf("psp: delete clusterrole: %s", err.Error())
+								logrus.Fatal("psp: delete clusterrole: " + err.Error())
 							}
 						case apierrors.IsNotFound(err):
 							break
 						default:
-							logrus.Fatalf("psp: get clusterrole: %s", err.Error())
+							logrus.Fatal("psp: get clusterrole: " + err.Error())
 						}
 					}
 
 					// check if role binding exists and delete it
 					_, err = cs.RbacV1().ClusterRoleBindings().Get(ctx, globalRestrictedRoleBindingName, metav1.GetOptions{})
 					if err != nil && !apierrors.IsNotFound(err) {
-						logrus.Fatalf("psp: get clusterrole: %s", err.Error())
+						logrus.Fatal("psp: get clusterrole: " + err.Error())
 					}
 					if err != nil {
 						switch {
 						case apierrors.IsAlreadyExists(err):
-							logrus.Infof("Deleting clusterRole binding: %s", globalRestrictedRoleBindingName)
+							logrus.Info("Deleting clusterRole binding: " + globalRestrictedRoleBindingName)
 							if err := cs.RbacV1().ClusterRoleBindings().Delete(ctx, globalRestrictedRoleBindingName, metav1.DeleteOptions{}); err != nil {
-								logrus.Fatalf("psp: delete clusterrole binding: %s", err.Error())
+								logrus.Fatal("psp: delete clusterrole binding: " + err.Error())
 							}
 						case apierrors.IsNotFound(err):
 							break
 						default:
-							logrus.Fatalf("psp: get clusterrole binding: %s", err.Error())
+							logrus.Fatal("psp: get clusterrole binding: " + err.Error())
 						}
 					}
 					ns.Annotations[namespaceAnnotationGlobalRestricted] = cisAnnotationValue
@@ -238,10 +238,10 @@ func setPSPs() func(context.Context, <-chan struct{}, string) error {
 					if apierrors.IsNotFound(err) {
 						tmpl := fmt.Sprintf(nodeClusterRoleBindingTemplate, globalUnrestrictedRoleName)
 						if err := deployClusterRoleBindingFromYaml(ctx, cs, tmpl); err != nil {
-							logrus.Fatalf("psp: deploy psp: %s", err.Error())
+							logrus.Fatal("psp: deploy psp: " + err.Error())
 						}
 					} else {
-						logrus.Fatalf("psp: get clusterrole binding: %s", err.Error())
+						logrus.Fatal("psp: get clusterrole binding: " + err.Error())
 					}
 				}
 			} else { // CIS mode
@@ -249,34 +249,34 @@ func setPSPs() func(context.Context, <-chan struct{}, string) error {
 					if _, err := cs.PolicyV1beta1().PodSecurityPolicies().Get(ctx, globalRestrictedPSPName, metav1.GetOptions{}); err != nil {
 						tmpl := fmt.Sprintf(globalRestrictedPSPTemplate, globalRestrictedPSPName)
 						if err := deployPodSecurityPolicyFromYaml(ctx, cs, tmpl); err != nil {
-							logrus.Fatalf("psp: delete clusterrole: %s", err.Error())
+							logrus.Fatal("psp: delete clusterrole: " + err.Error())
 						}
 					}
 					if _, err := cs.RbacV1().ClusterRoles().Get(ctx, globalRestrictedRoleName, metav1.GetOptions{}); err != nil {
 						if apierrors.IsNotFound(err) {
 							tmpl := fmt.Sprintf(roleTemplate, globalRestrictedRoleName, globalRestrictedPSPName)
 							if err := deployClusterRoleFromYaml(ctx, cs, tmpl); err != nil {
-								logrus.Fatalf("psp: deploy clusterrole: %s", err.Error())
+								logrus.Fatal("psp: deploy clusterrole: " + err.Error())
 							}
 						} else {
-							logrus.Fatalf("psp: get clusterrole: %s", err.Error())
+							logrus.Fatal("psp: get clusterrole: " + err.Error())
 						}
 					}
 					if _, err := cs.RbacV1().ClusterRoleBindings().Get(ctx, globalRestrictedRoleBindingName, metav1.GetOptions{}); err != nil {
 						if apierrors.IsNotFound(err) {
 							tmpl := fmt.Sprintf(globalRestrictedRoleBindingTemplate, globalRestrictedRoleBindingName, globalRestrictedRoleName)
 							if err := deployClusterRoleBindingFromYaml(ctx, cs, tmpl); err != nil {
-								logrus.Fatalf("psp: deploy clusterrole binding: %s", err.Error())
+								logrus.Fatal("psp: deploy clusterrole binding: " + err.Error())
 							}
 						} else {
-							logrus.Fatalf("psp: get clusterrole binding: %s", err.Error())
+							logrus.Fatal("psp: get clusterrole binding :" + err.Error())
 						}
 					}
 					ns.Annotations[namespaceAnnotationGlobalRestricted] = cisAnnotationValue
 				}
 
 				if err := setSystemUnrestricted(ctx, cs, ns); err != nil {
-					logrus.Fatalf("psp: set systemUnrestricted: %s", err.Error())
+					logrus.Fatal("psp: set systemUnrestricted: " + err.Error())
 				}
 
 				if _, ok := ns.Annotations[namespaceAnnotationGlobalUnrestricted]; !ok {
@@ -284,10 +284,10 @@ func setPSPs() func(context.Context, <-chan struct{}, string) error {
 						if apierrors.IsNotFound(err) {
 							tmpl := fmt.Sprintf(globalRestrictedPSPTemplate, globalRestrictedPSPName)
 							if err := deployPodSecurityPolicyFromYaml(ctx, cs, tmpl); err != nil {
-								logrus.Fatalf("psp: deploy psp: %s", err.Error())
+								logrus.Fatal("psp: deploy psp: " + err.Error())
 							}
 						} else {
-							logrus.Fatalf("psp: get psp: %s", err.Error())
+							logrus.Fatal("psp: get psp: " + err.Error())
 						}
 					}
 
@@ -296,14 +296,14 @@ func setPSPs() func(context.Context, <-chan struct{}, string) error {
 					if err != nil {
 						switch {
 						case apierrors.IsAlreadyExists(err):
-							logrus.Infof("Deleting clusterRole: %s", globalUnrestrictedRoleName)
+							logrus.Info("Deleting clusterRole: " + globalUnrestrictedRoleName)
 							if err := cs.RbacV1().ClusterRoles().Delete(ctx, globalUnrestrictedRoleName, metav1.DeleteOptions{}); err != nil {
-								logrus.Fatalf("psp: delete clusterrole: %s", err.Error())
+								logrus.Fatalf("psp: delete clusterrole: " + err.Error())
 							}
 						case apierrors.IsNotFound(err):
 							break
 						default:
-							logrus.Fatalf("psp: get clusterrole: %s", err.Error())
+							logrus.Fatal("psp: get clusterrole: " + err.Error())
 						}
 					}
 
@@ -312,14 +312,14 @@ func setPSPs() func(context.Context, <-chan struct{}, string) error {
 					if err != nil {
 						switch {
 						case apierrors.IsAlreadyExists(err):
-							logrus.Infof("Deleting clusterRoleBinding: %s", globalUnrestrictedRoleBindingName)
+							logrus.Info("Deleting clusterRoleBinding: " + globalUnrestrictedRoleBindingName)
 							if err := cs.RbacV1().ClusterRoleBindings().Delete(ctx, globalUnrestrictedRoleBindingName, metav1.DeleteOptions{}); err != nil {
-								logrus.Fatalf("psp: delete clusterrole binding: %s", err.Error())
+								logrus.Fatal("psp: delete clusterrole binding: " + err.Error())
 							}
 						case apierrors.IsNotFound(err):
 							break
 						default:
-							logrus.Fatalf("psp: get clusterrole binding: %s", err.Error())
+							logrus.Fatal("psp: get clusterrole binding: " + err.Error())
 						}
 					}
 					ns.Annotations[namespaceAnnotationGlobalUnrestricted] = cisAnnotationValue
@@ -329,10 +329,10 @@ func setPSPs() func(context.Context, <-chan struct{}, string) error {
 					if apierrors.IsNotFound(err) {
 						tmpl := fmt.Sprintf(nodeClusterRoleBindingTemplate, globalRestrictedRoleName)
 						if err := deployClusterRoleBindingFromYaml(ctx, cs, tmpl); err != nil {
-							logrus.Fatalf("psp: deploy psp: %s", err.Error())
+							logrus.Fatal("psp: deploy psp: " + err.Error())
 						}
 					} else {
-						logrus.Fatalf("psp: get clusterrole binding: %s", err.Error())
+						logrus.Fatalf("psp: get clusterrole binding: " + err.Error())
 					}
 				}
 			}

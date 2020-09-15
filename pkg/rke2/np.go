@@ -182,7 +182,7 @@ func setNetworkPolicies() func(context.Context, <-chan struct{}, string) error {
 
 				cs, err := newClient(kubeConfigAdmin, nil)
 				if err != nil {
-					logrus.Fatalf("networkPolicy: new k8s client: %s", err.Error())
+					logrus.Fatalf("networkPolicy: new k8s client: " + err.Error())
 				}
 				var namespaces = []string{
 					metav1.NamespaceSystem,

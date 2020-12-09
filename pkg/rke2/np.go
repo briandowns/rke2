@@ -51,6 +51,12 @@ var (
 	udp = corev1.ProtocolUDP
 )
 
+var namespaces = []string{
+	metav1.NamespaceSystem,
+	metav1.NamespaceDefault,
+	metav1.NamespacePublic,
+}
+
 // networkDNSPolicy allows for all DNS traffic
 // into the kube-system namespace.
 var networkDNSPolicy = v1.NetworkPolicy{
@@ -184,11 +190,7 @@ func setNetworkPolicies() func(context.Context, <-chan struct{}, string) error {
 				if err != nil {
 					logrus.Fatalf("networkPolicy: new k8s client: %s", err.Error())
 				}
-				var namespaces = []string{
-					metav1.NamespaceSystem,
-					metav1.NamespaceDefault,
-					metav1.NamespacePublic,
-				}
+
 				for _, namespace := range namespaces {
 					if err := setNetworkPolicy(ctx, namespace, cs); err != nil {
 						logrus.Fatal(err)

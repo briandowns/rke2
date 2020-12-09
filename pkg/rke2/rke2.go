@@ -58,6 +58,7 @@ func Server(clx *cli.Context, cfg Config) error {
 		setPSPs(),
 		setNetworkPolicies(),
 		setClusterRoles(),
+		updateDefaultServiceAccounts(),
 	)
 
 	return server.Run(clx)
